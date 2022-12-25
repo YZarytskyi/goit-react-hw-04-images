@@ -13,6 +13,7 @@ const Modal = ({ toggleModal, largeImage }: ModalProps) => {
     return () => {
       window.removeEventListener('keydown', onKeyDownCloseModal);
     };
+  // eslint-disable-next-line
   }, []);
 
   const onKeyDownCloseModal = (e: KeyboardEvent) => {

@@ -22,6 +22,7 @@ const App = () => {
       return;
     }
     fetchImages();
+  // eslint-disable-next-line
   }, [page, keyword]);
 
   const fetchImages = () => {
