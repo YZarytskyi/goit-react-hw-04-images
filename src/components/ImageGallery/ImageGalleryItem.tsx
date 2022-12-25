@@ -3,19 +3,19 @@ import s from './ImageGallery.module.css';
 interface ImageGalleryItemProps {
   image: string;
   index: number;
-  setLargeImage: (index: number) => void;
+  getLargeImage: (index: number) => void;
   toggleModal: () => void;
 }
 
-const ImageGalleryItem: React.FC<ImageGalleryItemProps> = ({
+const ImageGalleryItem = ({
   image,
   index,
-  setLargeImage,
+  getLargeImage,
   toggleModal,
-}) => {
+}: ImageGalleryItemProps) => {
   const onClickOpenModal = (e: React.MouseEvent<HTMLLIElement>) => {
     toggleModal();
-    setLargeImage(index);
+    getLargeImage(index);
   };
 
   return (

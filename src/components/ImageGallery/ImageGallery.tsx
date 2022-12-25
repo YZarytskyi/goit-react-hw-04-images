@@ -6,11 +6,11 @@ import s from './ImageGallery.module.css';
 interface ImageGalleryProps {
   images: Array<Image>;
   loading: boolean;
-  setLargeImage: (index: number) => void;
+  getLargeImage: (index: number) => void;
   toggleModal: () => void;
 }
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({images, loading, setLargeImage, toggleModal}) => {
+const ImageGallery = ({images, loading, getLargeImage, toggleModal}: ImageGalleryProps) => {
   return(
     <>
     <ul className={s.imageGallery}>
@@ -19,7 +19,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({images, loading, setLargeIma
           <ImageGalleryItem
             key={id}
             image={webformatURL}
-            setLargeImage={setLargeImage}
+            getLargeImage={getLargeImage}
             index={index}
             toggleModal={toggleModal}
           />

@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { Notify } from 'notiflix';
 import { pixabayApi } from '../api/api';
 import Button from './Button/Button';
@@ -8,120 +8,87 @@ import Searchbar from './Searchbar/Searchbar';
 import { Image } from './types/types';
 import s from './App.module.css';
 
-interface AppState {
-  images: Array<Image>;
-  totalImages: number | null;
-  page: number;
-  loading: boolean;
-  showModal: boolean;
-  largeImage: string | null;
-  keyword: string;
-}
+const App = () => {
+  const [images, setImages] = useState<Array<Image>>([]);
+  const [totalImages, setTotalImages] = useState<number>(0);
+  const [page, setPage] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [largeImage, setLargeImage] = useState<string>('');
+  const [keyword, setKeyword] = useState<string>('');
 
-export default class App extends Component<{}, AppState> {
-  state = {
-    images: [],
-    totalImages: null,
-    page: 1,
-    loading: false,
-    showModal: false,
-    largeImage: null,
-    keyword: '',
-  };
-
-  componentDidUpdate(prevProps: any, prevState: AppState): void {
-    const prevKeyword = prevState.keyword;
-    const nextKeyword = this.state.keyword;
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
-    const isUpdate = prevKeyword !== nextKeyword || prevPage !== nextPage;
-    if (isUpdate) {
-      this.fetchImages(nextKeyword, nextPage)
-    }
-  }
-
-  fetchImages = (nextKeyword: string, nextPage: number) => {
-    pixabayApi
-    .fetchImages(nextKeyword, nextPage)
-    .then(({ data }) => {
-      if (!data.hits.length) {
-        Notify.failure('Images not found');
-        this.clearStateImages();
-        return;
-      }
-      this.setState(({ images }) => ({
-        images: [...images, ...data.hits],
-        totalImages: data.total,
-      }));
-    })
-    .catch(err => console.log(err.message))
-    .finally(() =>
-    this.setState({
-      loading: false,
-    })
-    );
-  }
-
-  getImagesByKeyword = (keyword: string) => {
-    keyword = keyword?.trim().toLowerCase();
+  useEffect(() => {
     if (!keyword) {
-      Notify.failure('Please enter something');
-      this.clearStateImages();
       return;
     }
-    this.setState({
-      images: [],
-      totalImages: null,
-      loading: true,
-      page: 1,
-      keyword: keyword,
-    });
+    fetchImages();
+  }, [page, keyword]);
+
+  const fetchImages = () => {
+    pixabayApi
+      .fetchImages(keyword, page)
+      .then(({ data }) => {
+        if (!data.hits.length) {
+          Notify.failure('Images not found');
+          clearStateImages();
+          return;
+        }
+        setImages(prev => [...prev, ...data.hits]);
+        setTotalImages(data.total);
+      })
+      .catch(err => console.log(err.message))
+      .finally(() => setLoading(false));
   };
 
-  loadMoreImages = () => {
-    this.setState(({ page }) => ({
-      loading: true,
-      page: page + 1,
-    }));
+  const getImagesByKeyword = (query: string) => {
+    query = query?.trim().toLowerCase();
+    if (!query) {
+      Notify.failure('Please enter something');
+      clearStateImages();
+      return;
+    }
+    if (query === keyword) {
+      return;
+    }
+    clearStateImages();
+    setLoading(true);
+    setPage(1);
+    setKeyword(query);
   };
 
-  clearStateImages = () => {
-    this.setState({
-      images: [],
-      totalImages: null,
-    });
+  const loadMoreImages = () => {
+    setLoading(true);
+    setPage(prev => prev + 1);
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
+  const clearStateImages = () => {
+    setImages([]);
+    setTotalImages(0);
   };
 
-  setLargeImage = (index: number) => {
-    this.setState(({ images }) => ({
-      largeImage: images[index].largeImageURL,
-    }));
+  const toggleModal = () => {
+    setShowModal(prev => !prev);
   };
 
-  render() {
-    const { images, largeImage, loading, page, showModal, totalImages } =
-      this.state;
-    const hasMoreImages = totalImages! > page * 12;
-    return (
-      <div className={s.app}>
-        <Searchbar getImagesByKeyword={this.getImagesByKeyword} />
-        <ImageGallery
-          images={images}
-          loading={loading}
-          setLargeImage={this.setLargeImage}
-          toggleModal={this.toggleModal}
-        />
-        {showModal && (
-          <Modal toggleModal={this.toggleModal} largeImage={largeImage} />
-        )}
-        {hasMoreImages && <Button loadMoreImages={this.loadMoreImages} />}
-      </div>
-    );
-  }
-}
+  const getLargeImage = (index: number) => {
+    setLargeImage(images[index].largeImageURL);
+  };
+
+  const hasMoreImages = totalImages > page * 12;
+
+  return (
+    <div className={s.app}>
+      <Searchbar getImagesByKeyword={getImagesByKeyword} />
+      <ImageGallery
+        images={images}
+        loading={loading}
+        getLargeImage={getLargeImage}
+        toggleModal={toggleModal}
+      />
+      {showModal && <Modal toggleModal={toggleModal} largeImage={largeImage} />}
+      {hasMoreImages && <Button loadMoreImages={loadMoreImages} />}
+    </div>
+  );
+};
+
+export default App;

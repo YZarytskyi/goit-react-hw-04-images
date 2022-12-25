@@ -4,7 +4,7 @@ interface ButtonProps {
   loadMoreImages: () => void;
 }
 
-const Button: React.FC<ButtonProps> = ({ loadMoreImages }) => {
+const Button = ({ loadMoreImages }: ButtonProps) => {
   const onClickLoadMore = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     loadMoreImages();

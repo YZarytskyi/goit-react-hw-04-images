@@ -1,11 +1,11 @@
 import s from './Searchbar.module.css';
 
 interface SearchbarProps {
-  getImagesByKeyword: (keyword: string) => void;
+  getImagesByKeyword: (query: string) => void;
 }
 
-const Searchbar: React.FC<SearchbarProps> = ({ getImagesByKeyword }) => {
-  const onSubmitForm = (e: React.FormEvent<HTMLFormElement>) => {
+const Searchbar = ({ getImagesByKeyword }: SearchbarProps) => {
+  const onSubmitForm: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     getImagesByKeyword(e.currentTarget.search.value);
   };

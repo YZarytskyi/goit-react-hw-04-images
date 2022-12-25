@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect } from 'react';
 import s from './Modal.module.css';
 
 interface ModalProps {
@@ -6,29 +6,28 @@ interface ModalProps {
   largeImage: string | null;
 }
 
-export default class Modal extends Component<ModalProps> {
+const Modal = ({ toggleModal, largeImage }: ModalProps) => {
+  useEffect(() => {
+    window.addEventListener('keydown', onKeyDownCloseModal);
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.onKeyDownCloseModal);
-  }
+    return () => {
+      window.removeEventListener('keydown', onKeyDownCloseModal);
+    };
+  }, []);
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onKeyDownCloseModal);
-  }
-
-  onKeyDownCloseModal = (e: KeyboardEvent) => {
+  const onKeyDownCloseModal = (e: KeyboardEvent) => {
     if (e.code === 'Escape') {
-      this.props.toggleModal();
+      toggleModal();
     }
   };
 
-  render() {
-    return (
-      <div className={s.overlay} onClick={this.props.toggleModal}>
-        <div className={s.modal}>
-          <img src={this.props.largeImage || ""} alt="" />
-        </div>
+  return (
+    <div className={s.overlay} onClick={toggleModal}>
+      <div className={s.modal}>
+        <img src={largeImage || ''} alt="" />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+export default Modal;
